@@ -2,18 +2,45 @@ package com.gauntletrecolor;
 
 import net.runelite.api.JagexColor;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class RecolorConstants {
-    //Lobby
+    // ==== Lobby ====
+    // Object/Model Ids
     static final int LOBBY_WINDOW_OBJ_ID = 36096;
     static final int LOBBY_WINDOW_MODEL_ID = 37370;
     static final int CORNER_PILLAR_OBJ_ID = 36100;
     static final int CORNER_PILLAR_MODEL_ID = 37379;
-    static final int LOBBY_FLOOR_OBJ_ID = 36100;
+    static final int BEHIND_WINDOW_LEFT_OBJ_ID = 36099;
+    static final int BEHIND_WINDOW_LEFT_MODEL_ID = 37384;
+    static final int BEHIND_WINDOW_RIGHT_OBJ_ID = 36098;
+    static final int BEHIND_WINDOW_RIGHT_MODEL_ID = 37369;
+    static final int LOBBY_FLOOR_OBJ_ID = 36152;
 
-    //Blue Gauntlet
+    //Gameobjects
+    static final int SCOREBOARD_OBJ_ID = 36060;
+    static final int REWARD_CHEST_OBJ_ID = 37341;
+    static final int CHANNEL_TELEPORT_CHEST_OBJ_ID = 36082;
+    static final int ENTRY_TELEPORT_CHEST_OBJ_ID = 37340; //wrong plane
+    static final int DEPOSIT_BOX_OBJ_ID = 36086;
+    static final int RECIPE_BOOK_OBJ_ID = 36075;
+    static final int POTIONS_BOOK_OBJ_ID = 36076;
+
+    static final Set<Integer> LOBBY_GAME_MODELS = new HashSet<Integer>();
+    static {
+        LOBBY_GAME_MODELS.add(SCOREBOARD_OBJ_ID);
+        LOBBY_GAME_MODELS.add(REWARD_CHEST_OBJ_ID);
+        LOBBY_GAME_MODELS.add(CHANNEL_TELEPORT_CHEST_OBJ_ID);
+        LOBBY_GAME_MODELS.add(DEPOSIT_BOX_OBJ_ID);
+        LOBBY_GAME_MODELS.add(RECIPE_BOOK_OBJ_ID);
+        LOBBY_GAME_MODELS.add(POTIONS_BOOK_OBJ_ID);
+
+
+    }
+
+    //static final int[] SCOREBOARD_GAME_OBJ_COLORS = ; TODO save values ahead of time
+
+    // ==== Blue Gauntlet ====
     static final Map<Integer, Integer> BLUE_GAUNTLET_ID_MAP = new HashMap();
 
     static final int BLUE_WINDOW_OBJ_ID = 36095;
@@ -37,6 +64,8 @@ public final class RecolorConstants {
     static {
         BLUE_GAUNTLET_ID_MAP.put(LOBBY_WINDOW_OBJ_ID, LOBBY_WINDOW_MODEL_ID);
         BLUE_GAUNTLET_ID_MAP.put(CORNER_PILLAR_OBJ_ID, CORNER_PILLAR_MODEL_ID);
+        BLUE_GAUNTLET_ID_MAP.put(BEHIND_WINDOW_LEFT_OBJ_ID, BEHIND_WINDOW_LEFT_MODEL_ID);
+        BLUE_GAUNTLET_ID_MAP.put(BEHIND_WINDOW_RIGHT_OBJ_ID, BEHIND_WINDOW_RIGHT_MODEL_ID);
         BLUE_GAUNTLET_ID_MAP.put(BLUE_WINDOW_OBJ_ID, BLUE_WINDOW_MODEL_ID);
         BLUE_GAUNTLET_ID_MAP.put(BLUE_WINDOW_INACTIVE_OBJ_ID, BLUE_WINDOW_INACTIVE_MODEL_ID);
         BLUE_GAUNTLET_ID_MAP.put(BLUE_SPIKE_WALL_CENTRE_OBJ_ID, BLUE_SPIKE_WALL_CENTRE_MODEL_ID);
@@ -47,20 +76,31 @@ public final class RecolorConstants {
         BLUE_GAUNTLET_ID_MAP.put(BLUE_SPIKE_WALL_DOUBLE2_OBJ_ID, BLUE_SPIKE_WALL_DOUBLE2_MODEL_ID);
     }
 
+
+
     //Recolor codes
+    static final int[] LOBBY_GAME_OBJ_HSL_RANGE_VALUES = {26,45,1,8,1,140};
+    static final int[] LOBBY_FLOOR_HSL_RANGE_VALUES = {1,40,1,9,1,150};
+
+    //Lobby
     static short innerWindow = -31862;
     static short innerWindowTrim = -31784;
     static short windowBg1 = -31868;
     static short windowBg2 = -32506;
     static short overflow1 = -32630;
     static short overflow2 = -32626;
+    static short cornerPillarRing = JagexColor.packHSL(32,2,16);
+    static short cornerPillarMiddle = JagexColor.packHSL(33,7,37);
 
+    //Yellow Hue=9
     static short innerWindowNew = 7315;
     static short innerWindowTrimNew = 10840;
     static short windowBg1New = 9990;
     static short windowBg2New = 9992;
     static short overflow1New = 9354;
     static short overflow2New = 9358;
+    static short cornerPillarRingNew = JagexColor.packHSL(9,2,16);
+    static short cornerPillarMiddleNew = JagexColor.packHSL(9,7,37); //TODO
 
     static final Map<Short, Short> LOBBY_WALL_RECOLOR_VALUES = new HashMap();
     static {
@@ -70,6 +110,8 @@ public final class RecolorConstants {
         LOBBY_WALL_RECOLOR_VALUES.put(windowBg2, windowBg2New);
         LOBBY_WALL_RECOLOR_VALUES.put(overflow1, overflow1New);
         LOBBY_WALL_RECOLOR_VALUES.put(overflow2, overflow2New);
+        LOBBY_WALL_RECOLOR_VALUES.put(cornerPillarRing, cornerPillarRingNew);
+        LOBBY_WALL_RECOLOR_VALUES.put(cornerPillarMiddle, cornerPillarMiddleNew);
     }
 
     static short inactiveWindowBg = -31870;
@@ -79,8 +121,8 @@ public final class RecolorConstants {
 
     static final Map<Short, Short> BLUE_GAUNTLET_WALL_RECOLOR_VALUES = LOBBY_WALL_RECOLOR_VALUES;
     static {
-        LOBBY_WALL_RECOLOR_VALUES.put(inactiveWindowBg, inactiveWindowBgNew);
-        LOBBY_WALL_RECOLOR_VALUES.put(inactiveWindowTrim, inactiveWindowTrimNew);
+        BLUE_GAUNTLET_WALL_RECOLOR_VALUES.put(inactiveWindowBg, inactiveWindowBgNew);
+        BLUE_GAUNTLET_WALL_RECOLOR_VALUES.put(inactiveWindowTrim, inactiveWindowTrimNew);
     }
 
     static short centreSpikeColor1 = -32630; //JagexColor.packHSL(32,1,10);
