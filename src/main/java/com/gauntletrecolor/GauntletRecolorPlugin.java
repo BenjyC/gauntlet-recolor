@@ -1,7 +1,6 @@
 package com.gauntletrecolor;
 
 import com.gauntletrecolor.util.ColorDebugUtils;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
@@ -11,9 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GroundObjectSpawned;
-import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.*;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -69,7 +66,7 @@ public class GauntletRecolorPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Example started!");
+		log.info("Gauntlet Recolor started!");
 		//overlayManager.add(overlay);
 	}
 
@@ -77,14 +74,13 @@ public class GauntletRecolorPlugin extends Plugin
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
 		GameObject gameObj = event.getGameObject();
-		final Model model = gameObj.getRenderable().getModel();
 		int objId = gameObj.getId();
-		//TODO: If blue gauntlet, is that needed or can I just update colors everywhere
 		if (BLUE_GAUNTLET_ID_MAP.keySet().contains(objId)) {
 			clientThread.invoke(() -> replaceWallModels(gameObj, BLUE_GAUNTLET_ID_MAP.get(objId)));
 		}
 
-		if (LOBBY_GAME_MODELS.contains(gameObj.getId())) {
+		if (LOBBY_GAME_MODELS.contains(gameObj.getId()) || BLUE_GAUNTLET_GAME_MODELS.contains(gameObj.getId())) {
+			final Model model = gameObj.getRenderable().getModel();
 			if (model == null) {
 				Model newModel = (Model) gameObj.getRenderable();
 				clientThread.invoke(() -> replaceGameObjModels(newModel, LOBBY_GAME_OBJ_HSL_RANGE_VALUES));
@@ -94,29 +90,50 @@ public class GauntletRecolorPlugin extends Plugin
 		}
 	}
 
+	private void replaceWallModels(GameObject gameObject, int modelId) {
+		runeliteObject = client.createRuneLiteObject();
+
+		LocalPoint lp = gameObject.getLocalLocation();
+		ModelData wallModel = client.loadModelData(modelId).cloneColors();
+
+		// Get correct color mapping for each wall model and recolor
+		for (Map.Entry<Integer, Map> recolorMapping: MODEL_RECOLOR_MAPPING.entrySet()) {
+			Map<Short,Short> colorMap = recolorMapping.getValue();
+			for (Map.Entry<Short,Short> colorCodes : colorMap.entrySet()) {
+				wallModel.recolor(colorCodes.getKey(), colorCodes.getValue());
+			}
+		}
+
+		Scene scene = client.getScene();
+		scene.removeGameObject(gameObject);
+
+		runeliteObject.setActive(false);
+		runeliteObject.setModel(wallModel.light());
+		runeliteObject.setOrientation(gameObject.getOrientation());
+		runeliteObject.setLocation(lp, client.getPlane());
+		runeliteObject.setActive(true);
+	}
+
 	private void replaceGameObjModels(Model model, int[] hslArray) {
 		final int[] faceColors1 = model.getFaceColors1();
 		final int[] faceColors2 = model.getFaceColors2();
 		final int[] faceColors3 = model.getFaceColors3();
-//		final Color color = new Color(234, 226, 169);
 
 		ColorDebugUtils.changeGameObjectColors(faceColors1, hslArray);
 		ColorDebugUtils.changeGameObjectColors(faceColors2, hslArray);
 		ColorDebugUtils.changeGameObjectColors(faceColors3, hslArray);
-
-		//replaceFaceColorValues(faceColors1, faceColors2, faceColors3, colorToRs2hsb(color));
 	}
 
 	@Subscribe
 	public void onGroundObjectSpawned(GroundObjectSpawned event)
 	{
 		GroundObject groundObj = event.getGroundObject();
-		final Model model = groundObj.getRenderable().getModel();
-		if (LOBBY_FLOOR_OBJ_ID == groundObj.getId()) {
+		if (BLUE_FLOOR_IDS.contains(groundObj.getId())) {
 //			Scene scene = client.getScene();
 //			Tile[] tiles = scene.getTiles()[client.getPlane()][0];
 //
 //			SceneTilePaint paint = tiles[0].getSceneTilePaint();
+			final Model model = groundObj.getRenderable().getModel();
 			if (model == null) {
 				Model newModel = (Model) groundObj.getRenderable();
 				clientThread.invoke(() -> replaceFloors(newModel, LOBBY_FLOOR_HSL_RANGE_VALUES));
@@ -130,129 +147,52 @@ public class GauntletRecolorPlugin extends Plugin
 		final int[] faceColors1 = model.getFaceColors1();
 		final int[] faceColors2 = model.getFaceColors2();
 		final int[] faceColors3 = model.getFaceColors3();
-//		final Color color = new Color(234, 226, 169);
 
-		ColorDebugUtils.changeFloorColors(faceColors1, hslArray);
-		ColorDebugUtils.changeFloorColors(faceColors2, hslArray);
-		ColorDebugUtils.changeFloorColors(faceColors3, hslArray);
+		replaceFloorColorValues(faceColors1, faceColors2, faceColors3, JagexColor.packHSL(9,3,50));
 	}
 
-	private void replaceWallModels(GameObject gameObject, int modelId) {
-		log.info("Inside replaceWallModels");
-
-		runeliteObject = client.createRuneLiteObject();
-
-		LocalPoint lp = gameObject.getLocalLocation();
-		ModelData wallModel = client.loadModelData(modelId).cloneColors();
-		switch (modelId) {
-			case LOBBY_WINDOW_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : LOBBY_WALL_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-
-			case CORNER_PILLAR_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : LOBBY_WALL_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-
-			case BEHIND_WINDOW_LEFT_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : LOBBY_WALL_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-
-			case BEHIND_WINDOW_RIGHT_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : LOBBY_WALL_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-
-			case BLUE_WINDOW_INACTIVE_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : BLUE_GAUNTLET_WALL_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-			case BLUE_SPIKE_WALL_CENTRE_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-			case BLUE_SPIKE_WALL_LEFT_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-			case BLUE_SPIKE_WALL_RIGHT_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-			case BLUE_SPIKE_WALL_CORNER_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-			case BLUE_SPIKE_WALL_DOUBLE1_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-			case BLUE_SPIKE_WALL_DOUBLE2_MODEL_ID:
-				for (Map.Entry<Short, Short> colorMapping : BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.entrySet()) {
-					Short colorToChange = colorMapping.getKey();
-					Short newColor = colorMapping.getValue();
-					wallModel.recolor(colorToChange, newColor);
-				}
-				//TODO: Move this stuff into helper method
-		}
-
-//		if (modelId == CORNER_PILLAR_MODEL_ID) {
-//			//========= Find colors loop - Model =========
-//			if (colorSearch) {
-//				System.out.println("Before finding model colors");
-//				ColorDebugUtils.findColors(wallModel);
-//				colorSearch = false;
-//				System.out.println("After finding model colors");
-//			}
-//		}
-
-		Scene scene = client.getScene();
-		scene.removeGameObject(gameObject);
-
-		log.info("Model recolored");
-		runeliteObject.setActive(false);
-		runeliteObject.setModel(wallModel.light());
-		runeliteObject.setOrientation(gameObject.getOrientation());
-		runeliteObject.setLocation(lp, client.getPlane());
-		runeliteObject.setActive(true);
-	}
-
-	private void replaceFaceColorValues(int[] faceColors1, int[] faceColors2, int[] faceColors3, int color) {
+	private void replaceFloorColorValues(int[] faceColors1, int[] faceColors2, int[] faceColors3, short color) {
 		for (int i = 0; i < faceColors1.length; i++) {
-			if (colorsToChange.contains(faceColors1[i])) {
-				faceColors1[i] = color;
-			}
+			faceColors1[i] = color;
 		}
 		for (int i = 0; i < faceColors2.length; i++) {
-			if (colorsToChange.contains(faceColors2[i])) {
-				faceColors2[i] = color;
-			}
+			faceColors2[i] = color;
 		}
 		for (int i = 0; i < faceColors3.length; i++) {
-			if (colorsToChange.contains(faceColors3[i])) {
-				faceColors3[i] = color;
+			faceColors3[i] = color;
+		}
+	}
+
+//	private void replaceFaceColorValues(int[] faceColors1, int[] faceColors2, int[] faceColors3, int color) {
+//		for (int i = 0; i < faceColors1.length; i++) {
+//			if (colorsToChange.contains(faceColors1[i])) {
+//				faceColors1[i] = color;
+//			}
+//		}
+//		for (int i = 0; i < faceColors2.length; i++) {
+//			if (colorsToChange.contains(faceColors2[i])) {
+//				faceColors2[i] = color;
+//			}
+//		}
+//		for (int i = 0; i < faceColors3.length; i++) {
+//			if (colorsToChange.contains(faceColors3[i])) {
+//				faceColors3[i] = color;
+//			}
+//		}
+//	}
+
+	@Subscribe
+	void onNpcSpawned(final NpcSpawned event) {
+		final NPC npc = event.getNpc();
+
+		if (9021 == npc.getId()) {
+			log.info("Hunllef spawned");
+			final Model model = npc.getModel();
+			if (model == null) {
+				Model newModel = (Model) npc;
+				clientThread.invoke(() -> replaceGameObjModels(newModel, LOBBY_GAME_OBJ_HSL_RANGE_VALUES));
+			} else {
+				clientThread.invoke(() -> replaceGameObjModels(model, LOBBY_GAME_OBJ_HSL_RANGE_VALUES));
 			}
 		}
 	}
@@ -270,13 +210,6 @@ public class GauntletRecolorPlugin extends Plugin
 		return (encode_hue << 10) + (encode_saturation << 7) + (encode_brightness);
 	}
 
-	@Override
-	protected void shutDown() throws Exception
-	{
-		log.info("Example stopped!");
-		//overlayManager.remove(overlay);
-	}
-
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
@@ -290,5 +223,12 @@ public class GauntletRecolorPlugin extends Plugin
 	GauntletRecolorConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(GauntletRecolorConfig.class);
+	}
+
+	@Override
+	protected void shutDown() throws Exception
+	{
+		log.info("Gauntlet Recolor stopped!");
+		//overlayManager.remove(overlay);
 	}
 }

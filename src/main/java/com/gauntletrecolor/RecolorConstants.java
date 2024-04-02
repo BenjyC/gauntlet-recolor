@@ -34,14 +34,27 @@ public final class RecolorConstants {
         LOBBY_GAME_MODELS.add(DEPOSIT_BOX_OBJ_ID);
         LOBBY_GAME_MODELS.add(RECIPE_BOOK_OBJ_ID);
         LOBBY_GAME_MODELS.add(POTIONS_BOOK_OBJ_ID);
-
-
     }
 
     //static final int[] SCOREBOARD_GAME_OBJ_COLORS = ; TODO save values ahead of time
 
     // ==== Blue Gauntlet ====
-    static final Map<Integer, Integer> BLUE_GAUNTLET_ID_MAP = new HashMap();
+
+    // Object/Model Ids
+    static final int BLUE_FLOOR_OBJ_ID = 36149;
+    static final Set<Integer> BLUE_FLOOR_IDS = new HashSet();
+    static {
+        BLUE_FLOOR_IDS.add(BLUE_FLOOR_OBJ_ID);
+        BLUE_FLOOR_IDS.add(LOBBY_FLOOR_OBJ_ID);
+        BLUE_FLOOR_IDS.add(36155);
+        BLUE_FLOOR_IDS.add(36156);
+        BLUE_FLOOR_IDS.add(36157);
+        BLUE_FLOOR_IDS.add(36158);
+        BLUE_FLOOR_IDS.add(36159);
+        BLUE_FLOOR_IDS.add(36160);
+        BLUE_FLOOR_IDS.add(36161);
+        BLUE_FLOOR_IDS.add(36162);
+    }
 
     static final int BLUE_WINDOW_OBJ_ID = 36095;
     static final int BLUE_WINDOW_MODEL_ID = 37370;
@@ -61,6 +74,7 @@ public final class RecolorConstants {
     static final int BLUE_SPIKE_WALL_DOUBLE2_OBJ_ID = 36108;
     static final int BLUE_SPIKE_WALL_DOUBLE2_MODEL_ID = 37438;
 
+    static final Map<Integer, Integer> BLUE_GAUNTLET_ID_MAP = new HashMap();
     static {
         BLUE_GAUNTLET_ID_MAP.put(LOBBY_WINDOW_OBJ_ID, LOBBY_WINDOW_MODEL_ID);
         BLUE_GAUNTLET_ID_MAP.put(CORNER_PILLAR_OBJ_ID, CORNER_PILLAR_MODEL_ID);
@@ -76,6 +90,51 @@ public final class RecolorConstants {
         BLUE_GAUNTLET_ID_MAP.put(BLUE_SPIKE_WALL_DOUBLE2_OBJ_ID, BLUE_SPIKE_WALL_DOUBLE2_MODEL_ID);
     }
 
+
+    // Gameobjects
+    static final int BLUE_WATER_PUMP_OBJ_ID = 36078;
+    static final int BLUE_RANGE_OBJ_ID = 36077;
+    static final int BLUE_SINGING_BOWL_OBJ_ID = 36063;
+    static final int BLUE_TOOL_STORAGE_OBJ_ID = 36074;
+    static final int BLUE_CHANNEL_TELEPORT_OBJ_ID = 36062;
+    static final int BLUE_DOOR_NODE_RIGHT_OBJ_ID = 36101;
+    static final int BLUE_DOOR_NODE_LEFT_OBJ_ID = 36102;
+    static final int BLUE_DOOR_NODE_RIGHT_LIT_OBJ_ID = 36103;
+    static final int BLUE_DOOR_NODE_LEFT_LIT_OBJ_ID = 36104;
+    static final int BLUE_HUNLLEF_BARRIER_OBJ_ID = 37339;
+    static final int BLUE_PHREN_ROOTS_OBJ_ID = 36066;
+    static final int BLUE_LINUM_OBJ_ID = 36072;
+    static final int BLUE_ROCKS_OBJ_ID = 36064;
+    static final int BLUE_GRYM_OBJ_ID = 36070;
+
+    static final Set<Integer> BLUE_GAUNTLET_GAME_MODELS = new HashSet<Integer>();
+    static {
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_WATER_PUMP_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_RANGE_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_SINGING_BOWL_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_TOOL_STORAGE_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_CHANNEL_TELEPORT_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_DOOR_NODE_RIGHT_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_DOOR_NODE_LEFT_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_DOOR_NODE_RIGHT_LIT_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_DOOR_NODE_LEFT_LIT_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_HUNLLEF_BARRIER_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_PHREN_ROOTS_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_LINUM_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_ROCKS_OBJ_ID);
+        BLUE_GAUNTLET_GAME_MODELS.add(BLUE_GRYM_OBJ_ID);
+    }
+
+
+
+
+
+
+
+
+
+
+    ///////////////////////////////////
 
 
     //Recolor codes
@@ -137,5 +196,26 @@ public final class RecolorConstants {
         BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.put(centreSpikeColor2, centreSpikeColor2New);
         BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES.put(centreSpikeColor3, centreSpikeColor3New);
     }
+
+    // Mapping model ID to which recolor map it should use
+    static final Map<Integer, Map> MODEL_RECOLOR_MAPPING = new HashMap();
+    static {
+        MODEL_RECOLOR_MAPPING.put(LOBBY_WINDOW_MODEL_ID, LOBBY_WALL_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(CORNER_PILLAR_MODEL_ID, LOBBY_WALL_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BEHIND_WINDOW_LEFT_MODEL_ID, LOBBY_WALL_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BEHIND_WINDOW_RIGHT_MODEL_ID, LOBBY_WALL_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BLUE_WINDOW_INACTIVE_MODEL_ID, BLUE_GAUNTLET_WALL_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BLUE_SPIKE_WALL_CENTRE_MODEL_ID, BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BLUE_SPIKE_WALL_LEFT_MODEL_ID, BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BLUE_SPIKE_WALL_RIGHT_MODEL_ID, BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BLUE_SPIKE_WALL_CORNER_MODEL_ID, BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BLUE_SPIKE_WALL_DOUBLE1_MODEL_ID, BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES);
+        MODEL_RECOLOR_MAPPING.put(BLUE_SPIKE_WALL_DOUBLE2_MODEL_ID, BLUE_GAUNTLET_SPIKE_RECOLOR_VALUES);
+
+
+
+
+    }
+
 
 }

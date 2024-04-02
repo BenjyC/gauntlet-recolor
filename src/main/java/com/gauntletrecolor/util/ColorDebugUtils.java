@@ -50,23 +50,6 @@ public class ColorDebugUtils {
         }
     }
 
-    public static void changeFloorColors(int[] colors, int[] hslArray) {
-        for (int i = 0; i < colors.length; i++) {
-            Integer colorInt = colors[i];
-            int hue = JagexColor.unpackHue(colorInt.shortValue());
-            int sat = JagexColor.unpackSaturation(colorInt.shortValue());
-            int lum = JagexColor.unpackLuminance(colorInt.shortValue());
-
-            if ((hue >= hslArray[0] && hue <= hslArray[1])
-                    && (sat >= hslArray[2] && sat <= hslArray[3])
-                    && (lum >= hslArray[4] && lum <= hslArray[5])) {
-                //Recolor to yellow TODO change to any color
-                colors[i] = JagexColor.packHSL(9,3,50);
-            }
-        }
-    }
-
-
     //Model Data
     public static void findColors(ModelData md) {
         //Change color range here depending on what color you want to find
