@@ -49,9 +49,6 @@ public class GauntletRecolorPlugin extends Plugin
 	@Inject
 	private OverlayManager overlayManager;
 
-	@Inject
-	private RecolorGroundOverlay overlay;
-
 	private GameObject gameObj;
 	private int[] defaultObjFaceColors1;
 	private int[] defaultObjFaceColors2;
@@ -60,27 +57,19 @@ public class GauntletRecolorPlugin extends Plugin
 	private boolean colorSearch = true;
 	private Set<Integer> colorsToChange = new HashSet<>();
 
-	@Getter(AccessLevel.PACKAGE)
-	private final List<ColorTileMarker> points = new ArrayList<>();
-
 	@Override
-	protected void startUp() throws Exception
-	{
+	protected void startUp() throws Exception {
 		log.info("Gauntlet Recolor started!");
-		//overlayManager.add(overlay);
 	}
 
 	@Subscribe
-	public void onGameObjectSpawned(GameObjectSpawned event)
-	{
+	public void onGameObjectSpawned(GameObjectSpawned event) {
 		GameObject gameObj = event.getGameObject();
-		int objId = gameObj.getId();
-		if (BLUE_GAUNTLET_ID_MAP.keySet().contains(objId)) {
-			clientThread.invoke(() -> replaceWallModels(gameObj, BLUE_GAUNTLET_ID_MAP.get(objId)));
-		}
+		final Model model = gameObj.getRenderable().getModel();
+		if (BLUE_GAUNTLET_IDS.contains(gameObj.getId())
+			|| LOBBY_GAME_OBJECTS.contains(gameObj.getId())
+			|| BLUE_GAUNTLET_GAME_OBJECTS.contains(gameObj.getId())) {
 
-		if (LOBBY_GAME_MODELS.contains(gameObj.getId()) || BLUE_GAUNTLET_GAME_MODELS.contains(gameObj.getId())) {
-			final Model model = gameObj.getRenderable().getModel();
 			if (model == null) {
 				Model newModel = (Model) gameObj.getRenderable();
 				clientThread.invoke(() -> replaceGameObjModels(newModel, LOBBY_GAME_OBJ_HSL_RANGE_VALUES));
@@ -88,30 +77,6 @@ public class GauntletRecolorPlugin extends Plugin
 				clientThread.invoke(() -> replaceGameObjModels(model, LOBBY_GAME_OBJ_HSL_RANGE_VALUES));
 			}
 		}
-	}
-
-	private void replaceWallModels(GameObject gameObject, int modelId) {
-		runeliteObject = client.createRuneLiteObject();
-
-		LocalPoint lp = gameObject.getLocalLocation();
-		ModelData wallModel = client.loadModelData(modelId).cloneColors();
-
-		// Get correct color mapping for each wall model and recolor
-		for (Map.Entry<Integer, Map> recolorMapping: MODEL_RECOLOR_MAPPING.entrySet()) {
-			Map<Short,Short> colorMap = recolorMapping.getValue();
-			for (Map.Entry<Short,Short> colorCodes : colorMap.entrySet()) {
-				wallModel.recolor(colorCodes.getKey(), colorCodes.getValue());
-			}
-		}
-
-		Scene scene = client.getScene();
-		scene.removeGameObject(gameObject);
-
-		runeliteObject.setActive(false);
-		runeliteObject.setModel(wallModel.light());
-		runeliteObject.setOrientation(gameObject.getOrientation());
-		runeliteObject.setLocation(lp, client.getPlane());
-		runeliteObject.setActive(true);
 	}
 
 	private void replaceGameObjModels(Model model, int[] hslArray) {
@@ -125,14 +90,9 @@ public class GauntletRecolorPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGroundObjectSpawned(GroundObjectSpawned event)
-	{
+	public void onGroundObjectSpawned(GroundObjectSpawned event) {
 		GroundObject groundObj = event.getGroundObject();
 		if (BLUE_FLOOR_IDS.contains(groundObj.getId())) {
-//			Scene scene = client.getScene();
-//			Tile[] tiles = scene.getTiles()[client.getPlane()][0];
-//
-//			SceneTilePaint paint = tiles[0].getSceneTilePaint();
 			final Model model = groundObj.getRenderable().getModel();
 			if (model == null) {
 				Model newModel = (Model) groundObj.getRenderable();
@@ -148,6 +108,7 @@ public class GauntletRecolorPlugin extends Plugin
 		final int[] faceColors2 = model.getFaceColors2();
 		final int[] faceColors3 = model.getFaceColors3();
 
+		//todo save floor color to var
 		replaceFloorColorValues(faceColors1, faceColors2, faceColors3, JagexColor.packHSL(9,3,50));
 	}
 
@@ -163,30 +124,11 @@ public class GauntletRecolorPlugin extends Plugin
 		}
 	}
 
-//	private void replaceFaceColorValues(int[] faceColors1, int[] faceColors2, int[] faceColors3, int color) {
-//		for (int i = 0; i < faceColors1.length; i++) {
-//			if (colorsToChange.contains(faceColors1[i])) {
-//				faceColors1[i] = color;
-//			}
-//		}
-//		for (int i = 0; i < faceColors2.length; i++) {
-//			if (colorsToChange.contains(faceColors2[i])) {
-//				faceColors2[i] = color;
-//			}
-//		}
-//		for (int i = 0; i < faceColors3.length; i++) {
-//			if (colorsToChange.contains(faceColors3[i])) {
-//				faceColors3[i] = color;
-//			}
-//		}
-//	}
-
 	@Subscribe
 	void onNpcSpawned(final NpcSpawned event) {
 		final NPC npc = event.getNpc();
 
-		if (9021 == npc.getId()) {
-			log.info("Hunllef spawned");
+		if (BLUE_GAUNTLET_NPCS.contains(npc.getId())) {
 			final Model model = npc.getModel();
 			if (model == null) {
 				Model newModel = (Model) npc;
@@ -197,22 +139,8 @@ public class GauntletRecolorPlugin extends Plugin
 		}
 	}
 
-	private static int colorToRs2hsb(final Color color) {
-		final float[] hsbVals = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-
-		// "Correct" the brightness level to avoid going to white at full saturation, or having a low brightness at
-		// low saturation
-		hsbVals[2] -= Math.min(hsbVals[1], hsbVals[2] / 2);
-
-		final int encode_hue = (int) (hsbVals[0] * 63);
-		final int encode_saturation = (int) (hsbVals[1] * 7);
-		final int encode_brightness = (int) (hsbVals[2] * 127);
-		return (encode_hue << 10) + (encode_saturation << 7) + (encode_brightness);
-	}
-
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
+	public void onGameStateChanged(GameStateChanged gameStateChanged) {
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
@@ -220,15 +148,12 @@ public class GauntletRecolorPlugin extends Plugin
 	}
 
 	@Provides
-	GauntletRecolorConfig provideConfig(ConfigManager configManager)
-	{
+	GauntletRecolorConfig provideConfig(ConfigManager configManager) {
 		return configManager.getConfig(GauntletRecolorConfig.class);
 	}
 
 	@Override
-	protected void shutDown() throws Exception
-	{
+	protected void shutDown() throws Exception {
 		log.info("Gauntlet Recolor stopped!");
-		//overlayManager.remove(overlay);
 	}
 }
