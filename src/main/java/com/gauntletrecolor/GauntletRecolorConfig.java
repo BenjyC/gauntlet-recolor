@@ -1,19 +1,20 @@
 package com.gauntletrecolor;
 
+import com.gauntletrecolor.util.RecolorSelection;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("example")
+@ConfigGroup(GauntletRecolorConfig.CONFIG_GROUP)
 public interface GauntletRecolorConfig extends Config
 {
+	String CONFIG_GROUP = "gauntletrecolor";
+
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+			keyName = "colorSelection",
+			name = "Recolor Selection",
+			description = "Choose which color gauntlet will be recolored to.",
+			position = 2
 	)
-	default String greeting()
-	{
-		return "Hello";
-	}
+	default RecolorSelection recolorSelection() { return RecolorSelection.BLUE; }
 }

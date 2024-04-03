@@ -1,5 +1,6 @@
 package com.gauntletrecolor;
 
+import com.gauntletrecolor.util.RecolorSelection;
 import net.runelite.api.JagexColor;
 
 import java.util.*;
@@ -24,7 +25,7 @@ public final class RecolorConstants {
     static final int RECIPE_BOOK_OBJ_ID = 36075;
     static final int POTIONS_BOOK_OBJ_ID = 36076;
 
-    static final Set<Integer> LOBBY_GAME_OBJECTS = new HashSet<Integer>();
+    static final Set<Integer> LOBBY_GAME_OBJECTS = new HashSet<>();
     static {
         LOBBY_GAME_OBJECTS.add(SCOREBOARD_OBJ_ID);
         LOBBY_GAME_OBJECTS.add(REWARD_CHEST_OBJ_ID);
@@ -48,7 +49,7 @@ public final class RecolorConstants {
     static final int BLUE_SPIKE_WALL_FLOOR_7_OBJ_ID = 36161;
     static final int BLUE_SPIKE_WALL_FLOOR_8_OBJ_ID = 36162;
 
-    static final Set<Integer> BLUE_FLOOR_IDS = new HashSet();
+    static final Set<Integer> BLUE_FLOOR_IDS = new HashSet<>();
     static {
         BLUE_FLOOR_IDS.add(BLUE_FLOOR_OBJ_ID);
         BLUE_FLOOR_IDS.add(LOBBY_FLOOR_OBJ_ID);
@@ -71,7 +72,7 @@ public final class RecolorConstants {
     static final int BLUE_SPIKE_WALL_DOUBLE1_OBJ_ID = 36107;
     static final int BLUE_SPIKE_WALL_DOUBLE2_OBJ_ID = 36108;
 
-    static final Set<Integer> BLUE_GAUNTLET_IDS = new HashSet();
+    static final Set<Integer> BLUE_GAUNTLET_IDS = new HashSet<>();
     static {
         BLUE_GAUNTLET_IDS.add(LOBBY_WINDOW_OBJ_ID);
         BLUE_GAUNTLET_IDS.add(CORNER_PILLAR_OBJ_ID);
@@ -104,7 +105,7 @@ public final class RecolorConstants {
     static final int BLUE_ROCKS_OBJ_ID = 36064;
     static final int BLUE_GRYM_OBJ_ID = 36070;
 
-    static final Set<Integer> BLUE_GAUNTLET_GAME_OBJECTS = new HashSet<Integer>();
+    static final Set<Integer> BLUE_GAUNTLET_GAME_OBJECTS = new HashSet<>();
     static {
         BLUE_GAUNTLET_GAME_OBJECTS.add(BLUE_WATER_PUMP_OBJ_ID);
         BLUE_GAUNTLET_GAME_OBJECTS.add(BLUE_RANGE_OBJ_ID);
@@ -136,7 +137,7 @@ public final class RecolorConstants {
     static final int BLUE_DRAGON_NPC_ID = 9033;
     static final int BLUE_DARK_BEAST_NPC_ID = 9034;
 
-    static final Set<Integer> BLUE_GAUNTLET_NPCS = new HashSet<Integer>();
+    static final Set<Integer> BLUE_GAUNTLET_NPCS = new HashSet<>();
     static {
         BLUE_GAUNTLET_NPCS.add(BLUE_HUNLLEF_NPC_ID);
         BLUE_GAUNTLET_NPCS.add(BLUE_HUNLLEF2_NPC_ID);
@@ -158,6 +159,31 @@ public final class RecolorConstants {
 
 
     // Recolors
+    static final Map<RecolorSelection,Integer> OBJECT_COLOR_MAP = new HashMap<>();
+    static {
+        OBJECT_COLOR_MAP.put(RecolorSelection.BLUE, 32);
+        OBJECT_COLOR_MAP.put(RecolorSelection.NAVY, 40);
+        OBJECT_COLOR_MAP.put(RecolorSelection.YELLOW, 9);
+        OBJECT_COLOR_MAP.put(RecolorSelection.GREEN, 21);
+        OBJECT_COLOR_MAP.put(RecolorSelection.RED, 1);
+        OBJECT_COLOR_MAP.put(RecolorSelection.BLACK, 3);
+        OBJECT_COLOR_MAP.put(RecolorSelection.WHITE, 0);
+        OBJECT_COLOR_MAP.put(RecolorSelection.PURPLE, 52);
+
+    }
+
+    static final Map<RecolorSelection,Short> FLOOR_COLOR_MAP = new HashMap<>();
+    static {
+        FLOOR_COLOR_MAP.put(RecolorSelection.BLUE, JagexColor.packHSL(32,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.NAVY, JagexColor.packHSL(40,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.YELLOW, JagexColor.packHSL(9,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.GREEN, JagexColor.packHSL(21,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.RED, JagexColor.packHSL(1,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.BLACK, JagexColor.packHSL(3,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.WHITE, JagexColor.packHSL(0,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.PURPLE, JagexColor.packHSL(52,3,50));
+    }
+
     static final int[] LOBBY_GAME_OBJ_HSL_RANGE_VALUES = {26,45,1,8,1,140};
     static final int[] LOBBY_FLOOR_HSL_RANGE_VALUES = {1,40,1,9,1,150};
 }
