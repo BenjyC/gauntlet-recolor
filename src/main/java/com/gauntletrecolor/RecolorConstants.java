@@ -3,13 +3,16 @@ package com.gauntletrecolor;
 import com.gauntletrecolor.util.RecolorSelection;
 import net.runelite.api.JagexColor;
 
+import net.runelite.api.ObjectID;
+import net.runelite.api.NpcID;
+
 import java.util.*;
 
 public final class RecolorConstants {
 
     // ==== Lobby ====
 
-    // Object IDs
+    // Object IDs TODO can a lot of these be the inbuilt OBJECTIDS?
     static final int LOBBY_WINDOW_OBJ_ID = 36096;
     static final int CORNER_PILLAR_OBJ_ID = 36100;
     static final int BEHIND_WINDOW_LEFT_OBJ_ID = 36099;
@@ -88,7 +91,6 @@ public final class RecolorConstants {
         BLUE_GAUNTLET_IDS.add(BLUE_SPIKE_WALL_DOUBLE2_OBJ_ID);
     }
 
-
     // Gameobjects
     static final int BLUE_WATER_PUMP_OBJ_ID = 36078;
     static final int BLUE_RANGE_OBJ_ID = 36077;
@@ -124,33 +126,21 @@ public final class RecolorConstants {
     }
 
     // NPCs
-    static final int BLUE_HUNLLEF_NPC_ID = 9021;
-    static final int BLUE_HUNLLEF2_NPC_ID = 9022;
-    static final int BLUE_HUNLLEF3_NPC_ID = 9023;
-    static final int BLUE_RAT_NPC_ID = 9026;
-    static final int BLUE_SPIDER_NPC_ID = 9027;
-    static final int BLUE_BAT_NPC_ID = 9028;
-    static final int BLUE_HORSE_NPC_ID = 9029;
-    static final int BLUE_SCORPION_NPC_ID = 9030;
-    static final int BLUE_WOLF_NPC_ID = 9031;
-    static final int BLUE_BEAR_NPC_ID = 9032;
-    static final int BLUE_DRAGON_NPC_ID = 9033;
-    static final int BLUE_DARK_BEAST_NPC_ID = 9034;
-
     static final Set<Integer> BLUE_GAUNTLET_NPCS = new HashSet<>();
     static {
-        BLUE_GAUNTLET_NPCS.add(BLUE_HUNLLEF_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_HUNLLEF2_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_HUNLLEF3_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_RAT_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_SPIDER_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_BAT_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_HORSE_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_SCORPION_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_WOLF_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_BEAR_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_DRAGON_NPC_ID);
-        BLUE_GAUNTLET_NPCS.add(BLUE_DARK_BEAST_NPC_ID);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_HUNLLEF);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_HUNLLEF_9022);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_HUNLLEF_9023);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_HUNLLEF_9024);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_RAT);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_SPIDER);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_BAT);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_UNICORN);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_SCORPION);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_WOLF);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_BEAR);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_DRAGON);
+        BLUE_GAUNTLET_NPCS.add(NpcID.CRYSTALLINE_DARK_BEAST);
     }
 
 
@@ -162,25 +152,25 @@ public final class RecolorConstants {
     static final Map<RecolorSelection,Integer> OBJECT_COLOR_MAP = new HashMap<>();
     static {
         OBJECT_COLOR_MAP.put(RecolorSelection.BLUE, 32);
-        OBJECT_COLOR_MAP.put(RecolorSelection.NAVY, 40);
-        OBJECT_COLOR_MAP.put(RecolorSelection.YELLOW, 9);
-        OBJECT_COLOR_MAP.put(RecolorSelection.GREEN, 21);
-        OBJECT_COLOR_MAP.put(RecolorSelection.RED, 1);
-        OBJECT_COLOR_MAP.put(RecolorSelection.BLACK, 3);
-        OBJECT_COLOR_MAP.put(RecolorSelection.WHITE, 0);
-        OBJECT_COLOR_MAP.put(RecolorSelection.PURPLE, 52);
+        OBJECT_COLOR_MAP.put(RecolorSelection.NAVY, 38); //38,7,60
+        OBJECT_COLOR_MAP.put(RecolorSelection.YELLOW, 9); //working
+        OBJECT_COLOR_MAP.put(RecolorSelection.GREEN, 24); //working
+        OBJECT_COLOR_MAP.put(RecolorSelection.RED, 1); //working but should probably use CG colors
+        OBJECT_COLOR_MAP.put(RecolorSelection.BLACK, 11); //26, sat always 0, lum the same, /2 is very dark
+        OBJECT_COLOR_MAP.put(RecolorSelection.WHITE, 42);
+        OBJECT_COLOR_MAP.put(RecolorSelection.PURPLE, 34); //TODO can the enums themselves contain these values
 
     }
 
     static final Map<RecolorSelection,Short> FLOOR_COLOR_MAP = new HashMap<>();
     static {
-        FLOOR_COLOR_MAP.put(RecolorSelection.BLUE, JagexColor.packHSL(32,3,50));
-        FLOOR_COLOR_MAP.put(RecolorSelection.NAVY, JagexColor.packHSL(40,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.BLUE, JagexColor.packHSL(32,3,50)); //TODO get the short values
+        FLOOR_COLOR_MAP.put(RecolorSelection.NAVY, JagexColor.packHSL(38,7,50));
         FLOOR_COLOR_MAP.put(RecolorSelection.YELLOW, JagexColor.packHSL(9,3,50));
         FLOOR_COLOR_MAP.put(RecolorSelection.GREEN, JagexColor.packHSL(21,3,50));
         FLOOR_COLOR_MAP.put(RecolorSelection.RED, JagexColor.packHSL(1,3,50));
-        FLOOR_COLOR_MAP.put(RecolorSelection.BLACK, JagexColor.packHSL(3,3,50));
-        FLOOR_COLOR_MAP.put(RecolorSelection.WHITE, JagexColor.packHSL(0,3,50));
+        FLOOR_COLOR_MAP.put(RecolorSelection.BLACK, JagexColor.packHSL(26,0,60));
+        FLOOR_COLOR_MAP.put(RecolorSelection.WHITE, JagexColor.packHSL(42,0,140));
         FLOOR_COLOR_MAP.put(RecolorSelection.PURPLE, JagexColor.packHSL(52,3,50));
     }
 

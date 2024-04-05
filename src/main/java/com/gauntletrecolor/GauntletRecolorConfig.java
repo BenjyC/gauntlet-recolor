@@ -13,7 +13,7 @@ public interface GauntletRecolorConfig extends Config
 	@ConfigItem(
 			keyName = "colorSelection",
 			name = "Recolor Selection",
-			description = "Choose which color gauntlet will be recolored to.",
+			description = "Choose which color the Gauntlet will be recolored to.",
 			position = 2
 	)
 	default RecolorSelection recolorSelection() { return RecolorSelection.BLUE; }
