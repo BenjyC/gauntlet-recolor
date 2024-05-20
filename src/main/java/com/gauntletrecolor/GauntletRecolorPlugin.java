@@ -45,7 +45,7 @@ public class GauntletRecolorPlugin extends Plugin
 	@Inject
 	private GauntletRecolorConfig config;
 
-	private String END_OF_FILE = "EOF";
+	private String END_OF_FILE = "END_OF_FILE";
 
 	private boolean hunllefRecolored;
 
@@ -87,13 +87,30 @@ public class GauntletRecolorPlugin extends Plugin
 		int[] faceColors3 = model.getFaceColors3();
 
 		if (shutdown) {
-			if (DEFAULT_BLUE_COLOR_ARRAYS_MAP.isEmpty()) {
-				readColorArraysFromFile();
+			if (isInGauntletLobbyRegion()) {
+				if (DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP.isEmpty()) {
+					readColorArraysFromFile(DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP);
+				}
+				replaceColorArrays(faceColors1, faceColors2, faceColors3, id, DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP);
+
+
+//			} else if (isInBlueGauntletRegion()) {
+				//TODO fill this map
+//				if (DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP.isEmpty()) {
+//					readColorArraysFromFile(DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP);
+//				}
+//				replaceColorArrays(faceColors1, faceColors2, faceColors3, id, DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP);
+//			} else {
+				//TODO red gauntlet
+//				if (DEFAULT_BLUE_COLOR_ARRAYS_MAP.isEmpty()) {
+//					readColorArraysFromFile(DEFAULT_BLUE_COLOR_ARRAYS_MAP);
+//				}
+//				List<int[]> colors = DEFAULT_BLUE_COLOR_ARRAYS_MAP.get(id);
+//				System.arraycopy(colors.get(0), 0, faceColors1, 0, faceColors1.length);
+//				System.arraycopy(colors.get(1), 0, faceColors2, 0, faceColors2.length);
+//				System.arraycopy(colors.get(2), 0, faceColors3, 0, faceColors3.length);
 			}
-			List<int[]> colors = DEFAULT_BLUE_COLOR_ARRAYS_MAP.get(id);
-			System.arraycopy(colors.get(0), 0, faceColors1, 0, faceColors1.length);
-			System.arraycopy(colors.get(1), 0, faceColors2, 0, faceColors2.length);
-			System.arraycopy(colors.get(2), 0, faceColors3, 0, faceColors3.length);
+
 		}
 		else if (isFloor) {
 			replaceFloorColorValues(faceColors1, faceColors2, faceColors3, FLOOR_COLOR_MAP.get(config.recolorSelection()));
@@ -102,14 +119,20 @@ public class GauntletRecolorPlugin extends Plugin
 		}
 	}
 
-	//TODO move this
-	private void readColorArraysFromFile() {
-		log.info("reading from file..");
+	private void replaceColorArrays(int[] fc1, int[] fc2, int[] fc3, int id, Map<Integer,List<int[]>> map) {
+		List<int[]> colors = map.get(id);
+		System.arraycopy(colors.get(0), 0, fc1, 0, fc1.length);
+		System.arraycopy(colors.get(1), 0, fc2, 0, fc2.length);
+		System.arraycopy(colors.get(2), 0, fc3, 0, fc3.length);
+	}
+
+	private void readColorArraysFromFile(Map<Integer,List<int[]>> map) {
+		log.info("Reading from file...");
 
 //		try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 //			stream.forEach(System.out::println);
 //		}
-		try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/com/gauntletrecolor/defaultcolors.properties"))) {
+		try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/com/gauntletrecolor/colors/defaultcolors.txt"))) {
 			String line;
 
 			List<int[]> arr = new ArrayList<>();
@@ -117,18 +140,17 @@ public class GauntletRecolorPlugin extends Plugin
 			int counter = 0;
 
 			while ((line = br.readLine()) != null) {
-				System.out.print(line);
-				if (!line.equals(END_OF_FILE)) {
-					if (counter == 3) {
-						//Once we hit 3 lines, push array to map and reset
-						DEFAULT_BLUE_COLOR_ARRAYS_MAP.put(objId, arr);
-						arr = new ArrayList<>();
-						counter = 0;
-					}
-					String key = line.split("=")[0];
-					objId = Integer.parseInt(key.substring(0,5));
+				String key = line.split("=")[0];
+				if (counter == 3) {
+					//Once we hit 3 lines, push array to map and reset
+					map.put(objId, arr);
+					arr = new ArrayList<>();
+					counter = 0;
+				}
+				if (!key.equals(END_OF_FILE)) {
+					objId = Integer.parseInt(key.substring(0, 5));
 					String currArr = line.split("=")[1];
-					int[] currColors = Arrays.stream(currArr.substring(1, currArr.length()-1).split(","))
+					int[] currColors = Arrays.stream(currArr.substring(1, currArr.length() - 1).split(","))
 							.map(String::trim).mapToInt(Integer::parseInt).toArray();
 					arr.add(currColors);
 					counter++;
@@ -138,7 +160,7 @@ public class GauntletRecolorPlugin extends Plugin
 			ex.printStackTrace();
 		}
 
-		log.info("default map populated");
+		log.info("Map populated.");
 	}
 
 	private void replaceGameObjectColorValues(int[] faceColors1, int[] faceColors2, int[] faceColors3, int[] hslArray) {
@@ -257,7 +279,7 @@ public class GauntletRecolorPlugin extends Plugin
 			}
 		}
 
-		System.out.println("You changed color to: " + config.recolorSelection().toString());
+		log.info("You changed color to: " + config.recolorSelection().toString());
 	}
 
 	private void recolorObjectsInScene() {
@@ -335,8 +357,6 @@ public class GauntletRecolorPlugin extends Plugin
 				throw new RuntimeException(e);
 			}
 		});
-
-		//ColorDebugUtils.writeColorArrays(model, groundObj.getId());
 	}
 
 	private void updateGameObjects(GameObject gameObj) throws IOException {
@@ -385,7 +405,6 @@ public class GauntletRecolorPlugin extends Plugin
 		return false;
 	}
 
-	//TODO remove this if its not used elsewhere
 	private boolean isInGauntletLobbyRegion() {
 		if (client.getLocalPlayer() != null)
 		{

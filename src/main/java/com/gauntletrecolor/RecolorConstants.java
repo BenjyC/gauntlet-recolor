@@ -147,6 +147,9 @@ public final class RecolorConstants {
 
     // ==== Red Gauntlet ====
 
+
+
+
     ///////////////////////////////////
 
 
@@ -183,6 +186,7 @@ public final class RecolorConstants {
      * This section is pre-computed color arrays for the different GameObjects
      */
     // Default colors
-    static final Map<Integer,List<int[]>> DEFAULT_BLUE_COLOR_ARRAYS_MAP = new HashMap<>();
+    static final Map<Integer,List<int[]>> DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP = new HashMap<>();
+    static final Map<Integer,List<int[]>> DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP = new HashMap<>();
 
 }
