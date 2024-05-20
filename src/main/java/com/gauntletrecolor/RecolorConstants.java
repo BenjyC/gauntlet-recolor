@@ -7,19 +7,20 @@ import net.runelite.api.ObjectID;
 import net.runelite.api.NpcID;
 
 import java.util.*;
+import java.io.InputStream;
 
 public final class RecolorConstants {
 
     // ==== Lobby ====
 
-    // Object IDs TODO can a lot of these be the inbuilt OBJECTIDS?
+    // Room object IDs
     static final int LOBBY_WINDOW_OBJ_ID = 36096;
     static final int CORNER_PILLAR_OBJ_ID = 36100;
     static final int BEHIND_WINDOW_LEFT_OBJ_ID = 36099;
     static final int BEHIND_WINDOW_RIGHT_OBJ_ID = 36098;
     static final int LOBBY_FLOOR_OBJ_ID = 36152;
 
-    // Gameobjects
+    // GameObjects
     static final int SCOREBOARD_OBJ_ID = 36060;
     static final int REWARD_CHEST_OBJ_ID = 37341;
     static final int CHANNEL_TELEPORT_OBJ_ID = 36082;
@@ -30,12 +31,12 @@ public final class RecolorConstants {
 
     static final Set<Integer> LOBBY_GAME_OBJECTS = new HashSet<>();
     static {
-        LOBBY_GAME_OBJECTS.add(SCOREBOARD_OBJ_ID);
+        LOBBY_GAME_OBJECTS.add(ObjectID.SCOREBOARD_36060);
         LOBBY_GAME_OBJECTS.add(REWARD_CHEST_OBJ_ID);
-        LOBBY_GAME_OBJECTS.add(CHANNEL_TELEPORT_OBJ_ID);
-        LOBBY_GAME_OBJECTS.add(ENTRY_TELEPORT_OBJ_ID);
-        LOBBY_GAME_OBJECTS.add(DEPOSIT_BOX_OBJ_ID);
-        LOBBY_GAME_OBJECTS.add(RECIPE_BOOK_OBJ_ID);
+        LOBBY_GAME_OBJECTS.add(ObjectID.TELEPORT_PLATFORM_36082);
+        //LOBBY_GAME_OBJECTS.add(ENTRY_TELEPORT_OBJ_ID);
+        LOBBY_GAME_OBJECTS.add(ObjectID.BANK_DEPOSIT_BOX_36086);
+        LOBBY_GAME_OBJECTS.add(ObjectID.CRYSTAL_SINGING_RECIPES_36075);
         LOBBY_GAME_OBJECTS.add(POTIONS_BOOK_OBJ_ID);
     }
 
@@ -144,6 +145,7 @@ public final class RecolorConstants {
     }
 
 
+    // ==== Red Gauntlet ====
 
     ///////////////////////////////////
 
@@ -151,13 +153,13 @@ public final class RecolorConstants {
     // Recolors
     static final Map<RecolorSelection,Integer> OBJECT_COLOR_MAP = new HashMap<>();
     static {
-        OBJECT_COLOR_MAP.put(RecolorSelection.BLUE, 32);
+        OBJECT_COLOR_MAP.put(RecolorSelection.BLUE, 30);
         OBJECT_COLOR_MAP.put(RecolorSelection.NAVY, 38); //38,7,60
         OBJECT_COLOR_MAP.put(RecolorSelection.YELLOW, 9); //working
         OBJECT_COLOR_MAP.put(RecolorSelection.GREEN, 24); //working
         OBJECT_COLOR_MAP.put(RecolorSelection.RED, 1); //working but should probably use CG colors
-        OBJECT_COLOR_MAP.put(RecolorSelection.BLACK, 11); //26, sat always 0, lum the same, /2 is very dark
-        OBJECT_COLOR_MAP.put(RecolorSelection.WHITE, 42);
+        OBJECT_COLOR_MAP.put(RecolorSelection.BLACK, 32); //26, sat always 0, lum the same, /2 is very dark
+        OBJECT_COLOR_MAP.put(RecolorSelection.WHITE, 33);
         OBJECT_COLOR_MAP.put(RecolorSelection.PURPLE, 34); //TODO can the enums themselves contain these values
 
     }
@@ -176,4 +178,11 @@ public final class RecolorConstants {
 
     static final int[] LOBBY_GAME_OBJ_HSL_RANGE_VALUES = {26,45,1,8,1,140};
     static final int[] LOBBY_FLOOR_HSL_RANGE_VALUES = {1,40,1,9,1,150};
+
+    /**
+     * This section is pre-computed color arrays for the different GameObjects
+     */
+    // Default colors
+    static final Map<Integer,List<int[]>> DEFAULT_BLUE_COLOR_ARRAYS_MAP = new HashMap<>();
+
 }

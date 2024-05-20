@@ -1,10 +1,13 @@
 package com.gauntletrecolor.util;
 
 import net.runelite.api.JagexColor;
+import net.runelite.api.Model;
 import net.runelite.api.ModelData;
 
 import java.awt.*;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
+import java.util.List;
 
 /**
  * Utility class with some helper methods for finding specific HSL colors from models
@@ -59,4 +62,19 @@ public class ColorDebugUtils {
             }
         }
     }
+
+
+    public static void writeColorArrays(Model model, int objId) throws IOException {
+        PrintWriter printWriter = new PrintWriter(new FileOutputStream(new File("/home/benjyc/Dev/Github/Other/RuneLite/MyPlugins/gauntlet-recolor/src/main/java/com/gauntletrecolor/outputColors.txt"),true));
+        printWriter.println(objId);
+        printWriter.printf("Array 1: %s", Arrays.toString(model.getFaceColors1()));
+        printWriter.println("");
+        printWriter.printf("Array 2: %s", Arrays.toString(model.getFaceColors2()));
+        printWriter.println("");
+        printWriter.printf("Array 3: %s", Arrays.toString(model.getFaceColors3()));
+        printWriter.println("");
+
+        printWriter.close();
+    }
+
 }
