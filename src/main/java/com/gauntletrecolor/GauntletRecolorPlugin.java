@@ -20,6 +20,7 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedReader;
@@ -46,12 +47,13 @@ public class GauntletRecolorPlugin extends Plugin
 	private GauntletRecolorConfig config;
 
 	private String END_OF_FILE = "END_OF_FILE";
+	private String DEFAULT_COLORS_FILE_PATH = "src/main/java/com/gauntletrecolor/colors/";
 
 	private boolean hunllefRecolored;
 
 	private boolean shutdown = false;
 
-	private boolean colorSearch = true;
+	private boolean isNpc = false;
 
 	private RecolorSelection currentColor = RecolorSelection.BLUE;
 
@@ -64,6 +66,11 @@ public class GauntletRecolorPlugin extends Plugin
 	protected void startUp() throws Exception {
 		log.info("Gauntlet Recolor started!");
 		shutdown = false;
+
+		// Populate default color maps to switch colors back
+		readColorArraysFromFile(DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP, "defaultcolors_lobby.txt");
+		readColorArraysFromFile(DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP, "defaultcolors_bluegauntlet.txt");
+
 	}
 
 	@Subscribe
@@ -81,58 +88,96 @@ public class GauntletRecolorPlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	public void onGroundObjectSpawned(GroundObjectSpawned event) {
+		GroundObject groundObj = event.getGroundObject();
+		if (BLUE_FLOOR_IDS.contains(groundObj.getId())) {
+			clientThread.invoke(() -> {
+				try {
+					updateGroundObjects(groundObj);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+	}
+
+	@Subscribe
+	void onNpcSpawned(final NpcSpawned event) {
+		final NPC npc = event.getNpc();
+
+		if (BLUE_GAUNTLET_NPCS.contains(npc.getId())) {
+			clientThread.invoke(() -> updateNPCObjects(npc));
+		}
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event) {
+		if (!event.getKey().equals("colorSelection") || client.getGameState() != GameState.LOGGED_IN) {
+			return;
+		}
+
+		recolorObjectsInScene();
+
+		// Recolor NPCs
+//		List<NPC> NPCs = client.getNpcs();
+//		for (NPC npc : NPCs) {
+//			log.info(npc.getName());
+//			if (BLUE_GAUNTLET_NPCS.contains(npc.getId())) {
+//				log.info("inside npc config condition");
+//				clientThread.invoke(() -> updateNPCObjects(npc));
+//			}
+//		}
+
+		log.info("You changed color to: " + config.recolorSelection().toString());
+	}
+
 	private void recolorObjModels(Model model, boolean isFloor, int[] hslArray, int id) throws IOException {
 		int[] faceColors1 = model.getFaceColors1();
 		int[] faceColors2 = model.getFaceColors2();
 		int[] faceColors3 = model.getFaceColors3();
 
-		if (shutdown) {
-			if (isInGauntletLobbyRegion()) {
-				if (DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP.isEmpty()) {
-					readColorArraysFromFile(DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP);
-				}
-				replaceColorArrays(faceColors1, faceColors2, faceColors3, id, DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP);
+//		if (isInBlueGauntletRegion() && (id == BLUE_PHREN_ROOTS_OBJ_ID || id == BLUE_ROCKS_OBJ_ID ||
+//				id == BLUE_SPIKE_WALL_DOUBLE1_OBJ_ID || id == BLUE_SPIKE_WALL_DOUBLE2_OBJ_ID) || isNpc) {
+//			ColorDebugUtils.writeColorArrays(model, id);
+//		}
 
+		//If blue, use the precomputed arrays
+		if (shutdown || config.recolorSelection().equals(RecolorSelection.BLUE)) {
+			replaceColorArrays(faceColors1, faceColors2, faceColors3, id);
 
-//			} else if (isInBlueGauntletRegion()) {
-				//TODO fill this map
-//				if (DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP.isEmpty()) {
-//					readColorArraysFromFile(DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP);
-//				}
-//				replaceColorArrays(faceColors1, faceColors2, faceColors3, id, DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP);
-//			} else {
-				//TODO red gauntlet
-//				if (DEFAULT_BLUE_COLOR_ARRAYS_MAP.isEmpty()) {
-//					readColorArraysFromFile(DEFAULT_BLUE_COLOR_ARRAYS_MAP);
-//				}
-//				List<int[]> colors = DEFAULT_BLUE_COLOR_ARRAYS_MAP.get(id);
-//				System.arraycopy(colors.get(0), 0, faceColors1, 0, faceColors1.length);
-//				System.arraycopy(colors.get(1), 0, faceColors2, 0, faceColors2.length);
-//				System.arraycopy(colors.get(2), 0, faceColors3, 0, faceColors3.length);
-			}
+//			if (isInRedGauntletRegion()) {
+//				// TODO
+//			}
 
-		}
-		else if (isFloor) {
+		} else if (isFloor) { //Enter here for green/yellow recolors
 			replaceFloorColorValues(faceColors1, faceColors2, faceColors3, FLOOR_COLOR_MAP.get(config.recolorSelection()));
 		} else {
 			replaceGameObjectColorValues(faceColors1, faceColors2, faceColors3, hslArray);
 		}
 	}
 
-	private void replaceColorArrays(int[] fc1, int[] fc2, int[] fc3, int id, Map<Integer,List<int[]>> map) {
-		List<int[]> colors = map.get(id);
-		System.arraycopy(colors.get(0), 0, fc1, 0, fc1.length);
-		System.arraycopy(colors.get(1), 0, fc2, 0, fc2.length);
-		System.arraycopy(colors.get(2), 0, fc3, 0, fc3.length);
+	private void replaceColorArrays(int[] fc1, int[] fc2, int[] fc3, int id) { //Map<Integer,List<int[]>> map
+		List<int[]> colors = null;
+		if (DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP.containsKey(id)) {
+			colors = DEFAULT_BLUE_LOBBY_COLOR_ARRAYS_MAP.get(id);
+		} else if (DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP.containsKey(id)){
+			colors = DEFAULT_BLUE_GAUNTLET_COLOR_ARRAYS_MAP.get(id);
+		}
+		if (colors != null) {
+			System.arraycopy(colors.get(0), 0, fc1, 0, fc1.length);
+			System.arraycopy(colors.get(1), 0, fc2, 0, fc2.length);
+			System.arraycopy(colors.get(2), 0, fc3, 0, fc3.length);
+		}
 	}
 
-	private void readColorArraysFromFile(Map<Integer,List<int[]>> map) {
+	private void readColorArraysFromFile(Map<Integer,List<int[]>> map, String fileName) {
 		log.info("Reading from file...");
 
 //		try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 //			stream.forEach(System.out::println);
 //		}
-		try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/com/gauntletrecolor/colors/defaultcolors.txt"))) {
+		try (BufferedReader br = new BufferedReader(new FileReader(DEFAULT_COLORS_FILE_PATH + fileName))) {
 			String line;
 
 			List<int[]> arr = new ArrayList<>();
@@ -140,7 +185,9 @@ public class GauntletRecolorPlugin extends Plugin
 			int counter = 0;
 
 			while ((line = br.readLine()) != null) {
-				String key = line.split("=")[0];
+				String [] lineInfo = line.split("=");
+				String key = lineInfo[0];
+				String currArr = lineInfo[1];
 				if (counter == 3) {
 					//Once we hit 3 lines, push array to map and reset
 					map.put(objId, arr);
@@ -148,8 +195,7 @@ public class GauntletRecolorPlugin extends Plugin
 					counter = 0;
 				}
 				if (!key.equals(END_OF_FILE)) {
-					objId = Integer.parseInt(key.substring(0, 5));
-					String currArr = line.split("=")[1];
+					objId = Integer.parseInt(key.split("_")[0]);
 					int[] currColors = Arrays.stream(currArr.substring(1, currArr.length() - 1).split(","))
 							.map(String::trim).mapToInt(Integer::parseInt).toArray();
 					arr.add(currColors);
@@ -185,58 +231,10 @@ public class GauntletRecolorPlugin extends Plugin
 				&& (sat >= hslArray[2] && sat <= hslArray[3])
 				&& (lum >= hslArray[4] && lum <= hslArray[5])) {
 
-//			if (!config.recolorSelection().equals(currentColor)) {
-//				switch (config.recolorSelection()) {
-//					case BLACK:
-//						log.info("inside case black");
-//						colors[i] = JagexColor.packHSL(OBJECT_COLOR_MAP.get(RecolorSelection.BLACK),0,lum);
-//						break;
-//					case NAVY:
-//						int newSat = sat;
-//						if (sat <= 3) {
-//							 newSat = sat * 2;
-//						}
-//						int newLum = lum;
-//						if (lum <= 50) {
-//							newLum = lum / 2;
-//						}
-//						colors[i] = JagexColor.packHSL(OBJECT_COLOR_MAP.get(RecolorSelection.NAVY),newSat,newLum);
-//						if (recoloringWindows) {
-//							System.out.println("HSL COMBO BEFORE: H" + hue + " S" + sat + " L" + lum);
-//							System.out.println("HSL COMBO AFTER: H" + 38 + " S" + newSat + " L" + lum);
-//						}
-//						break;
-//					default:
-//						//log.info("inside case default");
-//						int newColor = OBJECT_COLOR_MAP.get(config.recolorSelection());
-//						colors[i] = JagexColor.packHSL(newColor,sat,lum);
-//				}
-//				if (config.recolorSelection().equals(RecolorSelection.BLACK)) {
-//					colors[i] = JagexColor.packHSL(OBJECT_COLOR_MAP.get(config.recolorSelection()),0,lum);
-//				} else {
-//					colors[i] = JagexColor.packHSL(newColor,sat,lum);
-//				}
-//			} //TODO need a translation for the sat/lum of each color
-
 			if (!config.recolorSelection().equals(currentColor)) {
 				int newColor = OBJECT_COLOR_MAP.get(config.recolorSelection());
 				colors[i] = JagexColor.packHSL(newColor,sat,lum);
 			}
-		}
-	}
-
-
-	@Subscribe
-	public void onGroundObjectSpawned(GroundObjectSpawned event) {
-		GroundObject groundObj = event.getGroundObject();
-		if (BLUE_FLOOR_IDS.contains(groundObj.getId())) {
-			clientThread.invoke(() -> {
-				try {
-					updateGroundObjects(groundObj);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			});
 		}
 	}
 
@@ -252,38 +250,10 @@ public class GauntletRecolorPlugin extends Plugin
 		}
 	}
 
-	@Subscribe
-	void onNpcSpawned(final NpcSpawned event) {
-		final NPC npc = event.getNpc();
-
-		if (BLUE_GAUNTLET_NPCS.contains(npc.getId())) {
-			clientThread.invoke(() -> updateNPCObjects(npc));
-		}
-	}
-
-	@Subscribe
-	public void onConfigChanged(ConfigChanged event) {
-		if (!event.getKey().equals("colorSelection") || client.getGameState() != GameState.LOGGED_IN) {
-			return;
-		}
-
-		recolorObjectsInScene();
-
-		// Recolor NPCs
-		List<NPC> NPCs = client.getNpcs();
-		for (NPC npc : NPCs) {
-			log.info(npc.getName());
-			if (BLUE_GAUNTLET_NPCS.contains(npc.getId())) {
-				log.info("inside npc config condition");
-				clientThread.invoke(() -> updateNPCObjects(npc));
-			}
-		}
-
-		log.info("You changed color to: " + config.recolorSelection().toString());
-	}
-
+	/**
+	 * Recolor all GameObjects and GroundObjects in scene
+	 */
 	private void recolorObjectsInScene() {
-		// Recolor all GameObjects and GroundObjects in scene
 		Scene scene = client.getScene();
 		Tile[][] tiles = scene.getTiles()[client.getPlane()];
 
@@ -315,6 +285,14 @@ public class GauntletRecolorPlugin extends Plugin
 						});
 					}
 				}
+			}
+		}
+
+		// Recolor NPCs
+		List<NPC> NPCs = client.getNpcs();
+		for (NPC npc : NPCs) {
+			if (BLUE_GAUNTLET_NPCS.contains(npc.getId())) {
+				clientThread.invoke(() -> updateNPCObjects(npc));
 			}
 		}
 	}
@@ -436,8 +414,11 @@ public class GauntletRecolorPlugin extends Plugin
 	protected void shutDown() throws Exception {
 		log.info("Gauntlet Recolor stopped!");
 
-		shutdown = true;
-		recolorObjectsInScene();
+		if (client.getGameState() == GameState.LOGGED_IN){
+			shutdown = true;
+			recolorObjectsInScene();
+		}
+		//TODO if I turn off, colors are swapped back, but gameobject hadnt spawned yet, then turn back on, then what? Like lit/unlit node of doorways
 
 	}
 }

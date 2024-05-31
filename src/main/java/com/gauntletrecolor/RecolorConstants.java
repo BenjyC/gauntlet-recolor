@@ -153,33 +153,33 @@ public final class RecolorConstants {
     ///////////////////////////////////
 
 
-    // Recolors
+    // ==== Recolors ====
     static final Map<RecolorSelection,Integer> OBJECT_COLOR_MAP = new HashMap<>();
     static {
-        OBJECT_COLOR_MAP.put(RecolorSelection.BLUE, 30);
-        OBJECT_COLOR_MAP.put(RecolorSelection.NAVY, 38); //38,7,60
+//        OBJECT_COLOR_MAP.put(RecolorSelection.BLUE, 30);
+//        OBJECT_COLOR_MAP.put(RecolorSelection.NAVY, 38);
         OBJECT_COLOR_MAP.put(RecolorSelection.YELLOW, 9); //working
         OBJECT_COLOR_MAP.put(RecolorSelection.GREEN, 24); //working
-        OBJECT_COLOR_MAP.put(RecolorSelection.RED, 1); //working but should probably use CG colors
-        OBJECT_COLOR_MAP.put(RecolorSelection.BLACK, 32); //26, sat always 0, lum the same, /2 is very dark
-        OBJECT_COLOR_MAP.put(RecolorSelection.WHITE, 33);
-        OBJECT_COLOR_MAP.put(RecolorSelection.PURPLE, 34); //TODO can the enums themselves contain these values
+        OBJECT_COLOR_MAP.put(RecolorSelection.RED, 1); // TODO use CG colors
+//        OBJECT_COLOR_MAP.put(RecolorSelection.BLACK, 32); //26, sat always 0, lum the same, /2 is very dark
+//        OBJECT_COLOR_MAP.put(RecolorSelection.WHITE, 33);
+//        OBJECT_COLOR_MAP.put(RecolorSelection.PURPLE, 34); //TODO can the enums themselves contain these values
 
     }
 
     static final Map<RecolorSelection,Short> FLOOR_COLOR_MAP = new HashMap<>();
     static {
-        FLOOR_COLOR_MAP.put(RecolorSelection.BLUE, JagexColor.packHSL(32,3,50)); //TODO get the short values
-        FLOOR_COLOR_MAP.put(RecolorSelection.NAVY, JagexColor.packHSL(38,7,50));
+//        FLOOR_COLOR_MAP.put(RecolorSelection.BLUE, JagexColor.packHSL(32,3,50)); //TODO get the short values
+//        FLOOR_COLOR_MAP.put(RecolorSelection.NAVY, JagexColor.packHSL(38,7,50));
         FLOOR_COLOR_MAP.put(RecolorSelection.YELLOW, JagexColor.packHSL(9,3,50));
         FLOOR_COLOR_MAP.put(RecolorSelection.GREEN, JagexColor.packHSL(21,3,50));
         FLOOR_COLOR_MAP.put(RecolorSelection.RED, JagexColor.packHSL(1,3,50));
-        FLOOR_COLOR_MAP.put(RecolorSelection.BLACK, JagexColor.packHSL(26,0,60));
-        FLOOR_COLOR_MAP.put(RecolorSelection.WHITE, JagexColor.packHSL(42,0,140));
-        FLOOR_COLOR_MAP.put(RecolorSelection.PURPLE, JagexColor.packHSL(52,3,50));
+//        FLOOR_COLOR_MAP.put(RecolorSelection.BLACK, JagexColor.packHSL(26,0,60));
+//        FLOOR_COLOR_MAP.put(RecolorSelection.WHITE, JagexColor.packHSL(42,0,140));
+//        FLOOR_COLOR_MAP.put(RecolorSelection.PURPLE, JagexColor.packHSL(52,3,50));
     }
 
-    static final int[] LOBBY_GAME_OBJ_HSL_RANGE_VALUES = {26,45,1,8,1,140};
+//    static final int[] LOBBY_GAME_OBJ_HSL_RANGE_VALUES = {26,45,1,8,1,140};
     static final int[] LOBBY_FLOOR_HSL_RANGE_VALUES = {1,40,1,9,1,150};
 
     /**
