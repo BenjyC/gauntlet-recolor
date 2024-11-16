@@ -46,6 +46,8 @@ public class GauntletRecolorPlugin extends Plugin
 	@Inject
 	private GauntletRecolorConfig config;
 
+	private RuneLiteObject runeliteObject;
+
 	private String END_OF_FILE = "END_OF_FILE";
 	private String DEFAULT_COLORS_FILE_PATH = "src/main/java/com/gauntletrecolor/colors/";
 
@@ -54,6 +56,8 @@ public class GauntletRecolorPlugin extends Plugin
 	private boolean shutdown = false;
 
 	private boolean isNpc = false;
+
+	private boolean colorSearch = true;
 
 	private RecolorSelection currentColor = RecolorSelection.BLUE;
 
@@ -77,7 +81,7 @@ public class GauntletRecolorPlugin extends Plugin
 	public void onGameObjectSpawned(GameObjectSpawned event) {
 		GameObject gameObj = event.getGameObject();
 		if (BLUE_GAUNTLET_IDS.contains(gameObj.getId()) || LOBBY_GAME_OBJECTS.contains(gameObj.getId())
-				|| BLUE_GAUNTLET_GAME_OBJECTS.contains(gameObj.getId())) {
+				|| BLUE_GAUNTLET_GAME_OBJECTS.contains(gameObj.getId()) || RED_GAUNTLET_GAME_OBJECTS.contains(gameObj.getId())) {
 			clientThread.invoke(() -> {
 				try {
 					updateGameObjects(gameObj);
@@ -91,7 +95,7 @@ public class GauntletRecolorPlugin extends Plugin
 	@Subscribe
 	public void onGroundObjectSpawned(GroundObjectSpawned event) {
 		GroundObject groundObj = event.getGroundObject();
-		if (BLUE_FLOOR_IDS.contains(groundObj.getId())) {
+		if (BLUE_FLOOR_IDS.contains(groundObj.getId()) || RED_FLOOR_IDS.contains(groundObj.getId())) {
 			clientThread.invoke(() -> {
 				try {
 					updateGroundObjects(groundObj);
@@ -144,13 +148,15 @@ public class GauntletRecolorPlugin extends Plugin
 
 		//If blue, use the precomputed arrays
 		if (shutdown || config.recolorSelection().equals(RecolorSelection.BLUE)) {
+			//client.getScene().setMinLevel(0);
 			replaceColorArrays(faceColors1, faceColors2, faceColors3, id);
 
 //			if (isInRedGauntletRegion()) {
 //				// TODO
 //			}
 
-		} else if (isFloor) { //Enter here for green/yellow recolors
+		} else if (isFloor) { // Enter here for recolors outside of blue/red
+			//client.getScene().setMinLevel(client.getPlane()); //TODO can this just work on floors
 			replaceFloorColorValues(faceColors1, faceColors2, faceColors3, FLOOR_COLOR_MAP.get(config.recolorSelection()));
 		} else {
 			replaceGameObjectColorValues(faceColors1, faceColors2, faceColors3, hslArray);
@@ -232,11 +238,24 @@ public class GauntletRecolorPlugin extends Plugin
 				&& (lum >= hslArray[4] && lum <= hslArray[5])) {
 
 			if (!config.recolorSelection().equals(currentColor)) {
-				int newColor = OBJECT_COLOR_MAP.get(config.recolorSelection());
-				colors[i] = JagexColor.packHSL(newColor,sat,lum);
+				colors[i] = JagexColor.packHSL(OBJECT_COLOR_MAP.get(config.recolorSelection()),sat,lum);
 			}
 		}
 	}
+
+
+//	private static int colorToRs2hsb(final Color color) {
+//		final float[] hsbVals = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+//
+//		// "Correct" the brightness level to avoid going to white at full saturation, or having a low brightness at
+//		// low saturation
+//		hsbVals[2] -= Math.min(hsbVals[1], hsbVals[2] / 2);
+//
+//		final int encode_hue = (int) (hsbVals[0] * 63);
+//		final int encode_saturation = (int) (hsbVals[1] * 7);
+//		final int encode_brightness = (int) (hsbVals[2] * 127);
+//		return (encode_hue << 10) + (encode_saturation << 7) + (encode_brightness);
+//	}
 
 	private void replaceFloorColorValues(int[] faceColors1, int[] faceColors2, int[] faceColors3, short color) {
 		for (int i = 0; i < faceColors1.length; i++) {
@@ -257,6 +276,7 @@ public class GauntletRecolorPlugin extends Plugin
 		Scene scene = client.getScene();
 		Tile[][] tiles = scene.getTiles()[client.getPlane()];
 
+		// Get objects in scene
 		for (int x = 0; x < Constants.SCENE_SIZE; x++) {
 			for (int y = 0; y < Constants.SCENE_SIZE; y++) {
 				Tile tile = tiles[x][y];
@@ -275,7 +295,8 @@ public class GauntletRecolorPlugin extends Plugin
 							}
 						}
 					}
-					if (tile.getGroundObject() != null && BLUE_FLOOR_IDS.contains(tile.getGroundObject().getId())) {
+					if (tile.getGroundObject() != null && (BLUE_FLOOR_IDS.contains(tile.getGroundObject().getId()) ||
+							RED_FLOOR_IDS.contains(tile.getGroundObject().getId()))) {
 						clientThread.invoke(() -> {
 							try {
 								updateGroundObjects(tile.getGroundObject());
@@ -291,7 +312,7 @@ public class GauntletRecolorPlugin extends Plugin
 		// Recolor NPCs
 		List<NPC> NPCs = client.getNpcs();
 		for (NPC npc : NPCs) {
-			if (BLUE_GAUNTLET_NPCS.contains(npc.getId())) {
+			if (BLUE_GAUNTLET_NPCS.contains(npc.getId()) || RED_GAUNTLET_NPCS.contains(npc.getId())) {
 				clientThread.invoke(() -> updateNPCObjects(npc));
 			}
 		}
@@ -313,9 +334,9 @@ public class GauntletRecolorPlugin extends Plugin
 			}
 		}
 
-		if (isInRedGauntletRegion()) {
-			log.info("red gauntlet");
-		}
+//		if (isInRedGauntletRegion()) {
+//			log.info("red gauntlet");
+//		}
 
 		if (!isInBlueGauntletRegion()) {
 			hunllefRecolored = false;
@@ -342,9 +363,26 @@ public class GauntletRecolorPlugin extends Plugin
 				? gameObj.getRenderable().getModel() : (Model) gameObj.getRenderable();
 
 		//TODO do we need the range values?
+		if (gameObj.getId() == ENTRY_TELEPORT_OBJ_ID) {
+
+//			//========= Find colors loop - Model =========
+//			if (colorSearch) {
+//				System.out.println("Before finding model colors");
+//				//
+//				ColorDebugUtils.findColors(entryTpModelData);
+//				colorSearch = false;
+//				System.out.println("After finding model colors");
+//			}
+		}
+
 		clientThread.invoke(() -> {
 			try {
-				recolorObjModels(model, false, LOBBY_FLOOR_HSL_RANGE_VALUES, gameObj.getId());
+				if (!isInRedGauntletRegion()) {
+					recolorObjModels(model, false, LOBBY_GAME_OBJ_HSL_RANGE_VALUES, gameObj.getId());
+				} else {
+					recolorObjModels(model, false, RED_FLOOR_HSL_RANGE_VALUES, gameObj.getId());
+				}
+
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -358,7 +396,11 @@ public class GauntletRecolorPlugin extends Plugin
 
 		clientThread.invoke(() -> {
 			try {
-				recolorObjModels(model, false, LOBBY_FLOOR_HSL_RANGE_VALUES, npc.getId());
+				if (!isInRedGauntletRegion()) {
+					recolorObjModels(model, false, LOBBY_FLOOR_HSL_RANGE_VALUES, npc.getId());
+				} else {
+					recolorObjModels(model, false, RED_FLOOR_HSL_RANGE_VALUES, npc.getId());
+				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -366,8 +408,7 @@ public class GauntletRecolorPlugin extends Plugin
 	}
 
 	private boolean isInBlueGauntletRegion() {
-		if (client.getLocalPlayer() != null)
-		{
+		if (client.getLocalPlayer() != null) {
 			WorldPoint wp = WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation());
 			return wp.getRegionID() == BLUE_GAUNTLET_REGION;
 		}
@@ -375,8 +416,7 @@ public class GauntletRecolorPlugin extends Plugin
 	}
 
 	private boolean isInRedGauntletRegion() {
-		if (client.getLocalPlayer() != null)
-		{
+		if (client.getLocalPlayer() != null) {
 			WorldPoint wp = WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation());
 			return wp.getRegionID() == RED_GAUNTLET_REGION;
 		}
@@ -384,8 +424,7 @@ public class GauntletRecolorPlugin extends Plugin
 	}
 
 	private boolean isInGauntletLobbyRegion() {
-		if (client.getLocalPlayer() != null)
-		{
+		if (client.getLocalPlayer() != null) {
 			return client.getLocalPlayer().getWorldLocation().getRegionID() == GAUNTLET_LOBBY_REGION;
 		}
 		return false;
@@ -399,7 +438,7 @@ public class GauntletRecolorPlugin extends Plugin
 
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged) {
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN){
+		if (gameStateChanged.getGameState() == GameState.LOGGED_IN) {
 
 		}
 
@@ -414,7 +453,7 @@ public class GauntletRecolorPlugin extends Plugin
 	protected void shutDown() throws Exception {
 		log.info("Gauntlet Recolor stopped!");
 
-		if (client.getGameState() == GameState.LOGGED_IN){
+		if (client.getGameState() == GameState.LOGGED_IN) {
 			shutdown = true;
 			recolorObjectsInScene();
 		}

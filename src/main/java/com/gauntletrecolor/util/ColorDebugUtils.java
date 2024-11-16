@@ -40,7 +40,7 @@ public class ColorDebugUtils {
     //Model Data
     public static void findColors(ModelData md) {
         //Change color range here depending on what color you want to find
-        for (int hue = 29; hue <= 33; hue++) {
+        for (int hue = 28; hue <= 34; hue++) {
             for (int sat = 1; sat <= 8; sat++) {
                 for (int lum = 1; lum <= 150; lum++) {
                     short colorToFind = JagexColor.packHSL(hue, sat, lum);

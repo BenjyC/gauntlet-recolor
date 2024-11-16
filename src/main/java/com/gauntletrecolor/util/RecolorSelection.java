@@ -3,12 +3,14 @@ package com.gauntletrecolor.util;
 public enum RecolorSelection {
 
     BLUE,
-    NAVY,
-    GREEN,
+    //NAVY,
     YELLOW,
-    RED,
-    BLACK,
-    WHITE,
-    PURPLE,
+    GREEN,
+    ORANGE,
+    //RED,
+    //BLACK,
+    //WHITE,
+    LIME
+    //PURPLE,
     ;
 }
